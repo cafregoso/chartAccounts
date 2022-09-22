@@ -16,7 +16,7 @@ from account.selializers import ChartSerializer
 # Create your views here.
 
 
-class ChartView(APIView):
+class ChartView(generics.ListAPIView):
     serializer_class = ChartSerializer
     queryset = Chart.objects.all()
 
