@@ -8,7 +8,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
-import { Container } from "@mui/material";
+import { Container, TextField } from "@mui/material";
 import Button from "@mui/material/Button";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import SearchIcon from '@mui/icons-material/Search';
@@ -21,12 +21,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { read, utils } from "xlsx";
 
 import CharDataService from "../../services/services";
+import { Box } from "@mui/system";
 
 export default function Home() {
   const [state, setState] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const navigate = useNavigate()
+  const [errorAccount, setErrorAccount] = useState(false)
+  const [errorDesc, setErrorDesc] = useState(false)
 
   const columns = [
     { id: "id", label: "ID", minWidth: 100 },
@@ -96,38 +98,39 @@ export default function Home() {
       width: 'auto',
     },
   }));
-  
-  const SearchIconWrapper = styled('div')(({ theme }) => ({
-    padding: theme.spacing(0, 2),
-    height: '100%',
-    position: 'absolute',
-    pointerEvents: 'none',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  }));
 
-  const StyledInputBase = styled(InputBase)(({ theme }) => ({
-    color: 'inherit',
-    '& .MuiInputBase-input': {
-      padding: theme.spacing(1, 1, 1, 0),
-      // vertical padding + font size from searchIcon
-      paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-      transition: theme.transitions.create('width'),
-      width: '100%',
-      [theme.breakpoints.up('sm')]: {
-        width: '12ch',
-        '&:focus': {
-          width: '20ch',
-        },
-      },
-    },
-  }));
-
-  const handleChange = (e) => {
+  const handleAccountChange = (e) => {
+    if (e.target.value === undefined) {
+      setErrorAccount(false)
+    }
     const search = e.target.value
     const getChart = state.find(chart => chart.Account === search)
 
+    if (getChart) {
+      setState([getChart])
+      setErrorAccount(false)
+    }
+    else {
+      setErrorAccount(true)
+    }
+    console.log(getChart)
+  }
+
+  const handleDescriptionChange = (e) => {
+    if (e.target.value === undefined) {
+      setErrorDesc(false)
+    }
+
+    const search = e.target.value
+    const getChart = state.find(chart => chart.Description === search)
+
+    if (getChart) {
+      setState([getChart])
+      setErrorDesc(false)
+    }
+    else {
+      setErrorDesc(true)
+    }
     console.log(getChart)
   }
 
@@ -152,16 +155,26 @@ export default function Home() {
             onChange={readUploadFile}
           />
         </Button>
-        <Search>
-            <SearchIconWrapper>
-              <SearchIcon />
-            </SearchIconWrapper>
-            <StyledInputBase
-              placeholder="Search…"
-              inputProps={{ 'aria-label': 'search' }}
-              onChange={handleChange}
+          <Box>
+            <TextField 
+              onChange={handleAccountChange}
+              error = { errorAccount }
+              name='account'
+              id="outlined" 
+              label="Account"
+              helperText={ errorAccount ? "Chart Account not found" : null}
             />
-          </Search>
+          </Box>
+          <Box>
+            <TextField 
+              onChange={handleDescriptionChange}
+              error = { errorDesc }
+              name='desc'  
+              id="outlined" 
+              label="Description"
+              helperText={ errorDesc ? "Chart Description not found" : null}
+            />
+          </Box>
       </ButtonGroup>
       <Paper sx={{ width: "100%", overflow: "hidden", marginTop: "50px" }}>
         <TableContainer sx={{ maxHeight: 440 }}>
