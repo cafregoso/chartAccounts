@@ -10,7 +10,8 @@ class ChartDataService {
     }
 
     create_chart(data) {
-        return axios.post(`/api/chart/`, data)
+        axios.defaults.headers.post['Content-Type'] = 'application/json'
+        return axios.post(`http://localhost:8000/api/chart/`, data)
     }
 
     update_chart(id, data) {

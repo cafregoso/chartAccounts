@@ -1,4 +1,5 @@
 # Django
+from urllib import request
 from django.shortcuts import render
 from django.http import JsonResponse
 
@@ -21,56 +22,66 @@ class ChartView(generics.ListAPIView):
     queryset = Chart.objects.all()
 
 
-class CreateChartView(APIView):
+class CreateChartView(generics.ListCreateAPIView):
     serializer_class = ChartSerializer
+    queryset = Chart.objects.all()
 
     def post(self, request):
-        
-        serializer = self.serializer_class(data=request.data)
-        if serializer.is_valid():
-            AcctType = serializer.data.get('acct_type')
-            Account = serializer.data.get('account')
-            Description = serializer.data.get('description')
-            Department = serializer.data.get('department')
-            TypicalBal = serializer.data.get('typical_bal')
-            DebitOffset = serializer.data.get('debit_offset')
-            CreditOffset = serializer.data.get('credit_offset')
+        is_many = isinstance(request.data, list)
 
-            queryset = Chart.objects.filter(Account=Account)
-            if queryset.exists():
-                chart = queryset[0]
-                chart.AcctType = AcctType
-                chart.Description = Description
-                chart.Department = Department
-                chart.TypicalBal = TypicalBal
-                chart.DebitOffset = DebitOffset
-                chart.CreditOffset = CreditOffset
+        if not is_many:
+            serializer = ChartSerializer(data=request.data)
+            if serializer.is_valid():
+                AcctType = serializer.data.get('AcctType')
+                Account = serializer.data.get('Account')
+                Description = serializer.data.get('Description')
+                Department = serializer.data.get('Department')
+                TypicalBal = serializer.data.get('TypicalBal')
+                DebitOffset = serializer.data.get('DebitOffset')
+                CreditOffset = serializer.data.get('CreditOffset')
 
-                chart.save(update_fields=[
-                    'AcctType',
-                    'Description',
-                    'Department',
-                    'TypicalBal',
-                    'DebitOffset',
-                    'CreditOffset'
-                ])
+                queryset = Chart.objects.filter(Account=Account)
+                if queryset.exists():
+                    chart = queryset[0]
+                    chart.AcctType = AcctType
+                    chart.Description = Description
+                    chart.Department = Department
+                    chart.TypicalBal = TypicalBal
+                    chart.DebitOffset = DebitOffset
+                    chart.CreditOffset = CreditOffset
 
-                return Response(ChartSerializer(chart).data, status=status.HTTP_200_OK)
-            else:
-                chart = Chart(
-                    AcctType = AcctType,
-                    Account=Account,
-                    Description = Description,
-                    Department = Department,
-                    TypicalBal = TypicalBal,
-                    DebitOffset = DebitOffset,
-                    CreditOffset = CreditOffset,
-                )
-                chart.save()
+                    chart.save(update_fields=[
+                        'AcctType',
+                        'Description',
+                        'Department',
+                        'TypicalBal',
+                        'DebitOffset',
+                        'CreditOffset'
+                    ])
 
-                return Response(ChartSerializer(chart).data, status=status.HTTP_201_CREATED)
-            
-        return Response({'Bad Request': 'Invalid data.'}, status= status.HTTP_400_BAD_REQUEST)
+                    return Response(ChartSerializer(chart).data, status=status.HTTP_200_OK)
+                else:
+                    chart = Chart(
+                        AcctType = AcctType,
+                        Account=Account,
+                        Description = Description,
+                        Department = Department,
+                        TypicalBal = TypicalBal,
+                        DebitOffset = DebitOffset,
+                        CreditOffset = CreditOffset,
+                    )
+                    chart.save()
+
+                    return Response(ChartSerializer(chart).data, status=status.HTTP_201_CREATED)
+                
+            return Response({'Bad Request': 'Invalid data.'}, status= status.HTTP_400_BAD_REQUEST)
+        else:
+            serializer = self.get_serializer(data=request.data, many=True)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            headers= self.get_success_headers(serializer.data)
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class ChartRetriveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):

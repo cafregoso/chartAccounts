@@ -1,7 +1,10 @@
-import React from 'react'
+import React, { Fragment } from 'react'
+import { Outlet } from 'react-router-dom'
 
 export default function Layout() {
   return (
-    <div>Layout</div>
+    <Fragment>
+        <Outlet />
+    </Fragment>
   )
 }
