@@ -2,24 +2,24 @@ import axios from 'axios'
 
 class ChartDataService {
     get_all() {
-        return axios.get('http://localhost:8000/api/charts/')
+        return axios.get('/api/charts/')
     }
 
     get_one(id) {
-        return axios.get(`http://localhost:8000/api/chart/${id}`)
+        return axios.get(`/api/chart/${id}`)
     }
 
     create_chart(data) {
         axios.defaults.headers.post['Content-Type'] = 'application/json'
-        return axios.post(`http://localhost:8000/api/chart/`, data)
+        return axios.post(`/api/chart/`, data)
     }
 
     update_chart(id, data) {
-        return axios.put(`http://localhost:8000/api/chart/${id}`, data)
+        return axios.put(`/api/chart/${id}`, data)
     }
 
     delete_chart(id) {
-        return axios.delete(`http://localhost:8000/api/chart/${id}`)
+        return axios.delete(`/api/chart/${id}`)
     }
 }
 
